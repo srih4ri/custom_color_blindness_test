@@ -1,7 +1,10 @@
-function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+function wrapText(ctx, text, x, y, maxWidth, lineHeight, fontsize) {
+  fontsize = 150 ;
+  x = 0;
+  y = fontsize;
   var words = text.split(' ');
   var line = '';
-
+  context.font= 600 + " " +( fontsize )+"pt Sans";
   for(var n = 0; n < words.length; n++) {
     var testLine = line + words[n] + ' ';
     var metrics = ctx.measureText(testLine);
@@ -9,7 +12,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
     if (testWidth > maxWidth && n > 0) {
       ctx.fillText(line, x, y);
       line = words[n] + ' ';
-      y += lineHeight;
+      y += 1.1 * (fontsize);
     }
     else {
       line = testLine;
@@ -17,13 +20,21 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   }
   ctx.fillText(line, x, y);
 }
+var putDot = function(context,color,x,y,r){
+  context.clearRect(x-r, y-r, 2 * r, 2*r);
+  context.beginPath();
+  context.arc(x, y, r, 0, 2 * Math.PI, false);
+  context.fillStyle = color||'red';
+  context.fill();
+}
 
 var drawImage = function(){
-  var text = (document.getElementById('inputText').value||'TYPE IN THE BOX!').toUpperCase();
+  var text = (document.getElementById('inputText').value||'you are not color blind, type in the box!').toUpperCase();
   console.log("Drawing",text);
   var canvas = document.getElementById('myCanvas');
-  var context = canvas.getContext('2d');
-  var iterations = 100000;
+  var ctx = context = canvas.getContext('2d');
+  ctx.canvas.width  = window.innerWidth;
+  ctx.canvas.height = window.innerHeight;
 
   var randBetween = function randBetween(min,max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -49,63 +60,59 @@ var drawImage = function(){
 
   var w = context.canvas.width;
   var h = context.canvas.height;
-  context.clearRect(0, 0, w, h);
   // Draw a text, read it as bitmap, map it into circles to be drawn.
-  context.font="200 30px Sans";
-  wrapText(context, text, 5, 30, 180, 24);
+
+  var circles = [];
+  var w = context.canvas.width;
+  var h = context.canvas.height;
+  var xDotsCount = 150;
+  var xIncrement = (w / xDotsCount);
+  var yDotsCount = (h / xIncrement);
+  var x = 0;
+  var y = xIncrement;
+  iterations = xDotsCount * yDotsCount;
+
+  wrapText(context, text, xIncrement * 2, xIncrement * 2, w, xIncrement, xIncrement);
+
   var data32 = new Uint32Array(context.getImageData(0, 0, w, h).data.buffer);
-  var msg = [];
-  var scale = 8;
   context.clearRect(0, 0, w, h);
+
+  var msg = [];
+  context.clearRect(0, 0, w, h);
+  scale = (w * h)/data32.length;
+  console.log(scale);
+  console.log(data32);
   for(i = 0; i < data32.length; i = i+1) {
     if (data32[i] & 0xff000000) {
       msg.push({
-        x: (i % w) * scale,
-        y: ((i * scale / w)|0)
+        x: (i % w),
+        y: (i / w )
       });
     }
   }
 
-  var circles = [];
+
   for(var i=0; i < iterations; i++){
-
-    var centerX, centerY, radius, colors;
-
-    // We draw the msg first, then fill other parts.
-    if(i < msg.length){
-      centerX = msg[i].x;
-      centerY = msg[i].y;
-      radius = randBetween(6, 9);
-      colors = onColors2;
-    } else {
-      centerX = randBetween(0,canvas.width);
-      centerY = randBetween(0,canvas.height);
-      radius = randBetween(8, 20);
-      colors = offColors2;
-    }
-
+    x =  x + xIncrement;
+    radius = xIncrement/2;
+    colors = onColors2;
     var color = colors[randBetween(0,colors.length)];
-
-    // Dumb collision detection.
-    var  collided = false;
-    for (var j = 0; j < circles.length; j ++) {
-      var circle = circles[j];
-      var dist = Math.sqrt((circle.x - centerX)*(circle.x - centerX) + (circle.y - centerY)*(circle.y - centerY));
-      if (dist < (circle.radius + radius)) {
-        collided = true;
-        break;
-      }
+    circles.push({x: x, y: y, radius: radius});
+    putDot(context,color,x,y,radius);
+    if((x + (2 * xIncrement)) > w){
+      x = 0;
+      y = y + xIncrement;
     }
-
-    // Draw the circles on canvas
-    if(!collided){
-      circles.push({x: centerX, y: centerY, radius: radius});
-      context.beginPath();
-      context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-      context.fillStyle = color;
-      context.fill();
-    }
-
   }
+  for(var i = 0; i < msg.length; i++) {
+
+   var m = msg[i];
+    colors = offColors2;
+    var color = colors[randBetween(0,colors.length)];
+    x = (parseInt(m.x/xIncrement) ) * xIncrement;
+    y = (parseInt(m.y/xIncrement) )* xIncrement;
+    putDot(context,color,x,y,xIncrement/2);
+  }
+
 }
 drawImage();

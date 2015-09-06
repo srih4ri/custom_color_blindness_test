@@ -1,16 +1,27 @@
 <html>
   <head>
     <style>
-      body {
-        margin: 0px;
-        padding: 0px;
-      }
+     body {
+       margin: 0px;
+       padding: 0px;
+     }
+     #inputs{
+       display: block;
+       float: left
+       border: 1px solid red;
+     }
+     #myCanvas{
+       float: left;
+       border: 2px solid green;
+     }
     </style>
   </head>
   <body>
-    <input type="text" id="inputText"/>
-    <button onClick="drawImage()">Draw</button>
-    <canvas id="myCanvas" width="1350" height="650"></canvas>
+    <div id="inputs">
+      <input type="text" id="inputText"/>
+      <button onClick="drawImage()">Draw</button>
+    </div>
+    <canvas id="myCanvas"></canvas>
     <script src="canvas.js" ></script>
   </body>
-</html>    
+</html>
