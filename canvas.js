@@ -1,5 +1,5 @@
 function wrapText(ctx, text, x, y, maxWidth, lineHeight, fontsize) {
-  fontsize = 150 ;
+  fontsize = parseInt(Math.sqrt(maxWidth)*3.5) ;
   x = 0;
   y = fontsize;
   var words = text.split(' ');
