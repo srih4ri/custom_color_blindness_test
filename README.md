@@ -1,4 +1,6 @@
-## Color Blind Messages
+### Color Blind Messages
+
+Try at : http://srih4ri.github.io/custom_color_blindness_test
 
 Draw a pattern similar to ishihara's color blindness text.
 User can enter the text using a tiny text box at the top too.
